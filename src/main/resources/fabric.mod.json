@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "nomoreaccidents",
+  "version": "${version}",
+  "name": "NoMoreAccidents",
+  "description": "Mitigates the Risk of accidentally Stripping Logs and Waxed Blocks",
+  "authors": [
+    "saturnvolv"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/nomoreaccidents/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "xyz.saturnvolv.nomoreaccidents.nomoreaccidents.NoMoreAccidents"
+    ]
+  },
+  "mixins": [
+    "NoMoreAccidents.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.7",
+    "fabric": "*",
+    "minecraft": "1.20.1"
+  }
+}
