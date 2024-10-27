@@ -51,7 +51,9 @@ public abstract class AxeItemMixin {
     }
 
     private void sendPlayerAxeUseWarning(PlayerEntity player, ItemStack itemStack) {
-        player.getWorld().playSound(player, player.getBlockPos(), SoundEvent.of(Identifier.of(NoMoreAccidents.MOD_ID, "boowomp")), SoundCategory.MASTER);
+        if (player.getWorld().getGameRules().getBoolean(ModGameRules.PLAY_SOUND_EFFECT)) // ????? WHY DOES THIS NOT WORK???
+            player.playSound(SoundEvent.of(Identifier.of(NoMoreAccidents.MOD_ID, "boowomp")), SoundCategory.BLOCKS, 1, 1);
+
         if (!player.getItemCooldownManager().isCoolingDown(itemStack.getItem())) {
             player.sendMessage(
                     Text.literal("Cannot interact with block.")

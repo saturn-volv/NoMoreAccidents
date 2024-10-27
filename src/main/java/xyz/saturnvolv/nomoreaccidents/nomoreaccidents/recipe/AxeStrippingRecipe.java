@@ -1,20 +1,24 @@
 package xyz.saturnvolv.nomoreaccidents.nomoreaccidents.recipe;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.*;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.HoneycombItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 import xyz.saturnvolv.nomoreaccidents.nomoreaccidents.NoMoreAccidents;
+import xyz.saturnvolv.nomoreaccidents.nomoreaccidents.registry.ModGameRules;
 
 import java.util.Map;
 import java.util.Optional;
@@ -58,7 +62,12 @@ public class AxeStrippingRecipe extends SpecialCraftingRecipe {
                 if (input.getItem() instanceof BlockItem blockItem) {
                     BlockState blockState = blockItem.getBlock().getDefaultState();
                     Optional<BlockState> optional = getStrippedState(blockState);
-                    if (optional.isEmpty() || !itemStack.isEmpty())
+                    Optional<BlockState> optional2 = Oxidizable.getDecreasedOxidationState(blockState);
+                    Optional<BlockState> optional3 = Optional.ofNullable((Block)((BiMap)HoneycombItem.WAXED_TO_UNWAXED_BLOCKS.get()).get(blockState.getBlock())).map((block) -> {
+                        return block.getStateWithProperties(blockState);
+                    });
+
+                    if ((optional.isEmpty() && optional2.isEmpty() && optional3.isEmpty()) || !itemStack.isEmpty())
                         return false;
 
                     itemStack = input;
@@ -83,10 +92,20 @@ public class AxeStrippingRecipe extends SpecialCraftingRecipe {
                 if (input.getItem() instanceof BlockItem blockItem) {
                     BlockState blockState = blockItem.getBlock().getDefaultState();
                     Optional<BlockState> optional = getStrippedState(blockState);
-                    if (optional.isEmpty() || !output.isEmpty())
+                    Optional<BlockState> optional2 = Oxidizable.getDecreasedOxidationState(blockState);
+                    Optional<BlockState> optional3 = Optional.ofNullable((Block)((BiMap) HoneycombItem.WAXED_TO_UNWAXED_BLOCKS.get()).get(blockState.getBlock())).map((block) -> {
+                        return block.getStateWithProperties(blockState);
+                    });
+
+                    if ((optional.isEmpty() && optional2.isEmpty() && optional3.isEmpty()) || !output.isEmpty())
                         return ItemStack.EMPTY;
 
-                    output = new ItemStack(optional.get().getBlock()).copyWithCount(1);
+                    if (optional.isPresent())
+                        output = new ItemStack(optional.get().getBlock()).copyWithCount(1);
+                    if (optional2.isPresent())
+                        output = new ItemStack(optional2.get().getBlock()).copyWithCount(1);
+                    if (optional3.isPresent())
+                        output = new ItemStack(optional3.get().getBlock()).copyWithCount(1);
                 } else {
                     if (!input.isIn(ItemTags.AXES))
                         return ItemStack.EMPTY;
@@ -105,9 +124,12 @@ public class AxeStrippingRecipe extends SpecialCraftingRecipe {
         for (int i = 0; i < remainderList.size(); i++) {
             ItemStack itemStack = inventory.getStack(i);
             if (itemStack.getItem() instanceof AxeItem) {
-                if (NoMoreAccidents.hasServer())
-                    itemStack.damage(1, NoMoreAccidents.server().getOverworld().getRandom(), null);
-                remainderList.set(i, itemStack.copy());
+                if (NoMoreAccidents.hasServer()) {
+                    ServerWorld world = NoMoreAccidents.server().getOverworld();
+                    itemStack.damage(world.getGameRules().getInt(ModGameRules.LOG_STRIP_PENALTY), world.getRandom(), null);
+                }
+                if (itemStack.getDamage() < itemStack.getMaxDamage())
+                    remainderList.set(i, itemStack.copy());
                 break;
             }
         }

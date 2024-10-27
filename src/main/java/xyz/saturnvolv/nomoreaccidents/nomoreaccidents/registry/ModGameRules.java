@@ -9,5 +9,14 @@ public class ModGameRules {
             GameRuleRegistry.register(
                     "blockCopperAxeInteraction", GameRules.Category.MISC, GameRuleFactory.createBooleanRule(false)
             );
+    // teehee :3c
+    public static final GameRules.Key<GameRules.IntRule> LOG_STRIP_PENALTY =
+            GameRuleRegistry.register(
+                    "logStrippingPenalty", GameRules.Category.MISC, GameRuleFactory.createIntRule(1, 0, 64)
+            );
+    public static final GameRules.Key<GameRules.BooleanRule> PLAY_SOUND_EFFECT =
+            GameRuleRegistry.register(
+                    "playStripDenySounds", GameRules.Category.MISC, GameRuleFactory.createBooleanRule(false)
+            );
     public static void init() {}
 }
